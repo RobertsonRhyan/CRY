@@ -1,6 +1,31 @@
 import unicodedata
 
 
+def normalize_text(text):
+    """
+    :param text: the text to normalize
+    :return: normalized <text> in upper or lower case depending on <case>
+    """
+    output = ""
+    for i in text:
+        char = i
+        char_num = ord(i)
+
+        if char_num < 65:
+            continue
+
+        if 90 < char_num < 97:
+            continue
+
+        # If char is not in A-Z range, convert to unaccented char
+        if char_num < 65 or char_num > 90:
+            char = str(unicodedata.normalize('NFKD', i).encode('ASCII', 'ignore'), 'ASCII')
+
+        output += char
+
+    return output.upper()
+
+
 def caesar_encrypt(text, key):
     """
     Parameters
@@ -12,21 +37,21 @@ def caesar_encrypt(text, key):
     -------
     the ciphertext of <text> encrypted with Caesar under key <key>
     """
-    # Convert plain text to upper case
-    text = text.upper()
+    # Normalize text
+    text = normalize_text(text)
 
     # Store the cipher text
     output = ""
 
     # Loop through every character in the text and shift *key* positions
-    for i in range(len(text)):
-        char = text[i]
-        # If char is not in A-Z range, convert to unaccented char
-        if ord(char) < 65 or ord(char) > 90:
-            char = unicodedata.normalize('NFKD', char).encode('ASCII', 'ignore')
+    # for i in range(len(text)):
+    #    char = text[i]
+    #    # A - Z : ASCII = 65 - 90
+    #    output += chr((ord(char) + key - 65) % 26 + 65)
 
+    for i in text:
         # A - Z : ASCII = 65 - 90
-        output += chr((ord(char) + key - 65) % 26 + 65)
+        output += chr((ord(i) + key - 65) % 26 + 65)
 
     return output
 
@@ -61,14 +86,13 @@ def freq_analysis(text):
     # Contains occurrences of every lettre (a-z)
     freq_vector = [0] * 26
 
-    # Convert all characters to lower case
-    text = text.lower()
+    # Normalize text
+    text = normalize_text(text)
 
-    # Loop through every character in text and count occurrences of every letter (a-z)
-    for i in range(len(text)):
-        char = text[i]
-        if ord(char) >= 97 and ord(char) <= 122:
-            freq_vector[ord(char) - 97] += 1
+    # Loop through every character in text and count occurrences of every letter (A-Z)
+    for i in text:
+        if 65 <= ord(i) <= 90:
+            freq_vector[ord(i) - 65] += 1
 
     # Sum total number of letters counted
     sum_letters = sum(freq_vector)
@@ -91,17 +115,15 @@ def caesar_break(text):
     a number corresponding to the caesar key
     """
     # Chances of a letter
-    stats = [0.07841540053061598, 0.00958838556217848, 0.030595746627351355, 0.04087027354168572, 0.1527957621095152,
-             0.011080303168917446, 0.011543008747422572, 0.009057065848457765, 0.07269139825051549,
-             0.0057750230473120855,
-             0.0006553529581488962, 0.05655740012244984, 0.030790153343795524, 0.0738798302591855, 0.055087474225715874,
-             0.029387082245476745, 0.01193006284351051, 0.07063561319924841, 0.08691475661334704, 0.07215128185279276,
-             0.06516143674480468, 0.015051126327419615, 0.00041696282169473395, 0.004643769484655064,
-             0.002656598568603579,
-             0.0016687309551791357]
+    stats = [0.08152736532371435, 0.009264280165431146, 0.03018370472614278, 0.039488781721660225, 0.1725705912650587,
+             0.010705768161813827, 0.01115283342484289, 0.008750920053511841, 0.07133920694362048, 0.00557981644826197,
+             0.0006332008002978168, 0.05464565403268166, 0.029749388472515684, 0.07138255357558718,
+             0.053824617827194825, 0.028393743806106264, 0.01152680436730066, 0.06824799713062295, 0.08397687499681275,
+             0.06971243334392918, 0.06373144806648523, 0.014542370057846506, 0.00040286869710223517,
+             0.004486801375533121, 0.0025676504935566507, 0.001612324722369072]
 
-    tmp_sum = 100   # Best sum yet (100 is a random value that seeems high enough, might not be for a long text)
-    tmp_key = 0     # Best key yet
+    tmp_sum = 100  # Best sum yet (100 is a random value that seeems high enough, might not be for a long text)
+    tmp_key = 0  # Best key yet
 
     # Try key from 1-26 (a-z), more than 26 will just loop around
     for current_key in range(26):
@@ -129,8 +151,19 @@ def vigenere_encrypt(text, key):
     -------
     the ciphertext of <text> encrypted with Vigenere under key <key>
     """
-    # TODO
-    return ""
+    # Normalize text
+    text = normalize_text(text)
+
+    keys = normalize_text(key)
+    key_length = len(keys)
+    output = ""
+
+    for i in range(len(text)):
+        current_key = ord(keys[i % key_length]) - 65
+        char = caesar_encrypt(text[i], current_key)
+        output += char
+
+    return output
 
 
 def vigenere_decrypt(text, key):
@@ -144,8 +177,20 @@ def vigenere_decrypt(text, key):
     -------
     the plaintext of <text> decrypted with Vigenere under key <key>
     """
-    # TODO
-    return ""
+
+    # Normalize text
+    text = normalize_text(text)
+
+    keys = normalize_text(key)
+    key_length = len(keys)
+    output = ""
+
+    for i in range(len(text)):
+        current_key = ord(keys[i % key_length]) - 65
+        char = caesar_decrypt(text[i], current_key)
+        output += char
+
+    return output
 
 
 def coincidence_index(text):
@@ -265,13 +310,53 @@ def main():
     ################################################################################
 
     print("\n2.5 Cesar Break\n")
+    print("Plain text       : ", plain_text)
 
-    for i in range(27):
+    all_keys_match = True
+
+    # Try for each key between 0 and 25
+    for i in range(26):
+        print("Key              : ", i)
+
         tmp_cipher_text = caesar_encrypt(plain_text, i)
-        print("Key = ", i)
-        print("Plain text       : ", plain_text)
         print("Cipher text      : ", tmp_cipher_text)
-        print("Best key found: ", caesar_break(tmp_cipher_text), "\n")
+
+        key_found = caesar_break(tmp_cipher_text)
+        print("Best key found   : ", key_found)
+        print("Plain text       : ", caesar_decrypt(tmp_cipher_text, key_found), "\n")
+
+        if i != key_found:
+            all_keys_match = False
+
+    if all_keys_match:
+        print("All keys found !\n")
+
+    ################################################################################
+    # 3 Chiffre de Vigenère
+    ################################################################################
+
+    print("3. Chiffre de Vigenère\n")
+
+    plain_text_vigenere_1 = "Vigenère"
+    plain_text_vigenere_2 = "La crypto c'est rigolo"
+
+    keys_vigenere_1 = "ABC"
+    keys_vigenere_2 = "xyz"
+
+    cipher_text_vigenere_1 = vigenere_encrypt(plain_text_vigenere_1, keys_vigenere_1)
+    cipher_text_vigenere_2 = vigenere_encrypt(plain_text_vigenere_2, keys_vigenere_2)
+
+    print("From plain text to cipher :")
+    print(plain_text_vigenere_1, " : ", cipher_text_vigenere_1)
+    print(plain_text_vigenere_2, " : ", cipher_text_vigenere_2)
+
+    print("\nFrom cipher text to plain : ")
+    print(cipher_text_vigenere_1, " : ", vigenere_decrypt(cipher_text_vigenere_1, keys_vigenere_1))
+    print(cipher_text_vigenere_2, " : ", vigenere_decrypt(cipher_text_vigenere_2, keys_vigenere_2))
+
+
+    print(vigenere_encrypt(cipher_text_vigenere_1, "AZY"))
+
 
 
 if __name__ == "__main__":
