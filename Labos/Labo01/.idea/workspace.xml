@@ -19,7 +19,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3ec1b125-897b-4a81-9272-f9e0247b116b" name="Default Changelist" comment="" />
+    <list default="true" id="3ec1b125-897b-4a81-9272-f9e0247b116b" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,7 +31,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="JupyterTrust" id="bdac6f34-a06e-4741-bc14-711a274d1586" />
+  <component name="JupyterTrust" id="c7874c30-931f-45cc-90af-b3540a2a74cd" />
   <component name="ProjectId" id="1jjEELEaS2NoH8WTckSDW0O3CRL" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -38,7 +41,8 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.github.ui.GithubSettingsConfigurable" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Interp" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
@@ -77,6 +81,8 @@
       <workItem from="1604409308625" duration="10149000" />
       <workItem from="1604585679148" duration="733000" />
       <workItem from="1604668952098" duration="6179000" />
+      <workItem from="1604686530486" duration="76000" />
+      <workItem from="1604686638853" duration="112000" />
     </task>
     <servers />
   </component>
@@ -93,16 +99,25 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="223" y="67" width="1089" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604309511782">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="223" y="67" width="1089" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824@0.0.1536.824" timestamp="1604309511782" />
+    <state x="639" y="254" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1604686563078">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="639" y="254" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1604686563078" />
     <state width="606" height="466" key="DebuggerActiveHint" timestamp="1604411037025">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="606" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1604411037025" />
+    <state x="624" y="182" key="FileChooserDialogImpl" timestamp="1604686697077">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="624" y="182" key="FileChooserDialogImpl/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1604686697077" />
     <state width="753" height="910" key="GridCell.Tab.-1.bottom" timestamp="1604330837856">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -167,9 +182,10 @@
     <state width="1493" height="242" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1604325425187" />
     <state width="587" height="735" key="GridCell.Tab.1.right/0.0.1536.864@0.0.1536.864" timestamp="1604327354980" />
     <state width="753" height="910" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604330826577" />
-    <state x="346" y="72" key="SettingsEditor" timestamp="1604679504078">
+    <state x="512" y="81" key="SettingsEditor" timestamp="1604686751077">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="512" y="81" key="SettingsEditor/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1604686751077" />
     <state x="277" y="57" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1604326029512" />
     <state x="346" y="72" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1604679504078" />
     <state width="969" height="529" key="XDebugger.FullValuePopup" timestamp="1604673637529">
@@ -192,7 +208,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main.py</url>
-          <line>217</line>
+          <line>228</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

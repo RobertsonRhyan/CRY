@@ -3,8 +3,13 @@ import unicodedata
 
 def normalize_text(text):
     """
-    :param text: the text to normalize
-    :return: normalized <text> in upper or lower case depending on <case>
+    Parameters
+    ----------
+    text: the text to normalize
+
+    Returns
+    -------
+    normalized <text> in upper or lower case depending on <case>
     """
     output = ""
     for i in text:
@@ -114,7 +119,7 @@ def caesar_break(text):
     -------
     a number corresponding to the caesar key
     """
-    # Chances of a letter
+    # Letter frequencies for French
     stats = [0.08152736532371435, 0.009264280165431146, 0.03018370472614278, 0.039488781721660225, 0.1725705912650587,
              0.010705768161813827, 0.01115283342484289, 0.008750920053511841, 0.07133920694362048, 0.00557981644826197,
              0.0006332008002978168, 0.05464565403268166, 0.029749388472515684, 0.07138255357558718,
@@ -122,7 +127,7 @@ def caesar_break(text):
              0.06971243334392918, 0.06373144806648523, 0.014542370057846506, 0.00040286869710223517,
              0.004486801375533121, 0.0025676504935566507, 0.001612324722369072]
 
-    tmp_sum = 100  # Best sum yet (100 is a random value that seeems high enough, might not be for a long text)
+    tmp_sum = 100  # Best sum yet (100 is a random value that seems high enough, might not be for a long text)
     tmp_key = 0  # Best key yet
 
     # Try key from 1-26 (a-z), more than 26 will just loop around
