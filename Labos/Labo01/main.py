@@ -203,8 +203,19 @@ def coincidence_index(text):
     -------
     the index of coincidence of the text
     """
-    # TODO
-    return 0
+
+    text = normalize_text(text)
+    N = len(text)  # Length of text
+    freq_vector = freq_analysis(text)  # Get frequencies of lettres
+
+    sum_freq = 0
+
+    for i in range(26):
+        sum_freq += freq_vector[i] * (freq_vector[i] - 1)
+
+    ic = sum_freq / (N * (N - 1))
+
+    return ic
 
 
 def vigenere_break(text):
@@ -275,7 +286,7 @@ def main():
     print("Welcome to the Vigenere breaking tool\n")
 
     ################################################################################
-    # 2 Chiffre de César Généralisé
+    # 2. Chiffre de César Généralisé
     ################################################################################
 
     print("2. Chiffre de César Généralisé")
@@ -332,7 +343,7 @@ def main():
         print("All keys found !\n")
 
     ################################################################################
-    # 3 Chiffre de Vigenère
+    # 3. Chiffre de Vigenère
     ################################################################################
 
     print("3. Chiffre de Vigenère\n")
@@ -354,9 +365,26 @@ def main():
     print(cipher_text_vigenere_1, " : ", vigenere_decrypt(cipher_text_vigenere_1, keys_vigenere_1))
     print(cipher_text_vigenere_2, " : ", vigenere_decrypt(cipher_text_vigenere_2, keys_vigenere_2))
 
+    ################################################################################
+    # 3.1 Indice de Coïncidence
+    ################################################################################
 
-    print(vigenere_encrypt(cipher_text_vigenere_1, "AZY"))
+    # The Index of Coincidence (I.C.) is a statistical technique that gives an indication of how English-like a piece
+    # of text is.
 
+    file1 = open("texte.txt", "r")
+
+    text42 = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer The Slings and " \
+             "Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, And by opposing end them? " \
+             "William Shakespeare - Hamlet "
+
+    IC_1 = coincidence_index(text42)
+
+    file1.close()
+
+    IC_2 = coincidence_index(plain_text_vigenere_2)
+
+    print(IC_1, " - ", IC_2)
 
 
 if __name__ == "__main__":
