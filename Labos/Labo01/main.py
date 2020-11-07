@@ -77,6 +77,21 @@ def caesar_decrypt(text, key):
     return caesar_encrypt(text, -key)
 
 
+def freq_letters(text):
+    # Contains occurrences of every lettre (a-z)
+    freq_vector = [0] * 26
+
+    # Normalize text
+    text = normalize_text(text)
+
+    # Loop through every character in text and count occurrences of every letter (A-Z)
+    for i in text:
+        if 65 <= ord(i) <= 90:
+            freq_vector[ord(i) - 65] += 1
+
+    return freq_vector
+
+
 def freq_analysis(text):
     """
     Parameters
@@ -102,7 +117,7 @@ def freq_analysis(text):
     # Sum total number of letters counted
     sum_letters = sum(freq_vector)
 
-    # occurrences of a letter / total letters
+    # Occurrences of a letter / total letters
     for i in range(len(freq_vector)):
         freq_vector[i] /= sum_letters
 
@@ -211,7 +226,7 @@ def coincidence_index(text):
 
     text = normalize_text(text)
     N = len(text)  # Length of text
-    freq_vector = freq_analysis(text)  # Get frequencies of lettres
+    freq_vector = freq_letters(text)  # Get frequencies of lettres
 
     sum_freq = 0
 
@@ -221,6 +236,34 @@ def coincidence_index(text):
     ic = sum_freq / (N * (N - 1))
 
     return ic
+
+
+def find_key_length(text):
+    text = normalize_text(text)
+    ################################################################################
+    # Find key length
+    ################################################################################
+
+    MAX_KEY_LENGTH_TEST = 20
+    TEXT_LEN = len(text)
+    best_ic = 0
+    best_key_length = 0
+
+    for l in range(1, MAX_KEY_LENGTH_TEST):
+        seq = ""
+        for i in range(TEXT_LEN):
+            idx = i * l
+            if idx > TEXT_LEN - 1:
+                break
+            seq += text[idx]
+
+        ic = coincidence_index(seq)
+        if ic > best_ic:
+            best_ic = ic
+            best_key_length = l
+        print(best_key_length)
+
+    return best_key_length
 
 
 def vigenere_break(text):
@@ -233,7 +276,35 @@ def vigenere_break(text):
     -------
     the keyword corresponding to the encryption key used to obtain the ciphertext
     """
-    # TODO
+
+    text = normalize_text(text)
+    ################################################################################
+    # Find key length
+    ################################################################################
+
+    key_length = find_key_length(text)
+
+    ################################################################################
+
+    print("best key:", caesar_break("VURZJUGRGGUGVGJQKEOAGUGKKQVWQP"))
+
+    TEXT_LENGTH = len(text)
+    chi_sq = 0
+
+    for start in range(key_length):
+        seq = ""
+        for i in range(TEXT_LENGTH):
+            idx = start + key_length
+            if idx > TEXT_LENGTH:
+                break
+            seq += text[idx]
+
+        for j in range(26):
+            print(caesar_decrypt(seq, j))
+
+
+
+
     return ''
 
 
@@ -310,19 +381,20 @@ def main():
     print("\n2.1 Analyse de Fréquence\n")
 
     file1 = open("texte.txt", "r")
+    text_french = file1.read()
+    file1.close()
 
     keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
             'v', 'w', 'x', 'y', 'z']
 
-    freq_vector = freq_analysis(file1.read())
-    file1.close()
+    freq_vector = freq_analysis(text_french)
 
     dictionary = dict(zip(keys, freq_vector))
 
     print(dictionary)
 
     ################################################################################
-    # 2.2 Cesar Break
+    # 2.5 Cesar Break
     ################################################################################
 
     print("\n2.5 Cesar Break\n")
@@ -355,6 +427,7 @@ def main():
 
     plain_text_vigenere_1 = "Vigenère"
     plain_text_vigenere_2 = "La crypto c'est rigolo"
+    test_text = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer The Slings and Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, And by opposing end them? William Shakespeare - Hamlet"
 
     keys_vigenere_1 = "ABC"
     keys_vigenere_2 = "xyz"
@@ -377,19 +450,25 @@ def main():
     # The Index of Coincidence (I.C.) is a statistical technique that gives an indication of how English-like a piece
     # of text is.
 
-    file1 = open("texte.txt", "r")
+    print("\n3.1 Indice de Coïncidence\n")
 
-    text42 = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer The Slings and " \
-             "Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, And by opposing end them? " \
-             "William Shakespeare - Hamlet "
+    print("Texte francais : ", coincidence_index(text_french))
 
-    IC_1 = coincidence_index(text42)
+    cipher_test_text = vigenere_encrypt(test_text, "ABC")
 
-    file1.close()
+    print("Plain text   : ", coincidence_index(test_text))
+    print("Cipher text  : ", coincidence_index(cipher_test_text))
 
-    IC_2 = coincidence_index(plain_text_vigenere_2)
+    ################################################################################
+    # 3.2 Cryptanalyse du Chiffre de Vigenère
+    ################################################################################
 
-    print(IC_1, " - ", IC_2)
+    print("\nVigenere break\n")
+
+    # vptnvffuntshtarptymjwzirappljmhhqvsubw
+    file2 = open("vigenere.txt", "r")
+    vigenere_break("VURZJUGRGGUGVGJQKEOAGUGKKQVWQP")
+    file2.close()
 
 
 if __name__ == "__main__":
