@@ -1,4 +1,5 @@
 import unicodedata
+from math import ceil
 
 
 def normalize_text(text):
@@ -239,29 +240,40 @@ def coincidence_index(text):
 
 
 def find_key_length(text):
+    """
+    Doesn't work well with short text as the last sequence is to short
+    Parameters
+    ----------
+    text: the ciphertext to get key length from
+
+    Returns
+    -------
+    the best keyword length found
+    """
+
     text = normalize_text(text)
     ################################################################################
     # Find key length
     ################################################################################
 
-    MAX_KEY_LENGTH_TEST = 20
-    TEXT_LEN = len(text)
+    max_key_length_test = 20
+    text_len = len(text)
     best_ic = 0
     best_key_length = 0
 
-    for l in range(1, MAX_KEY_LENGTH_TEST):
+    for l in range(1, max_key_length_test):
         seq = ""
-        for i in range(TEXT_LEN):
+        for i in range(text_len):
             idx = i * l
-            if idx > TEXT_LEN - 1:
+            if idx > text_len - 1:
                 break
             seq += text[idx]
 
         ic = coincidence_index(seq)
+
         if ic > best_ic:
             best_ic = ic
             best_key_length = l
-        print(best_key_length)
 
     return best_key_length
 
@@ -278,34 +290,28 @@ def vigenere_break(text):
     """
 
     text = normalize_text(text)
-    ################################################################################
-    # Find key length
-    ################################################################################
 
+    # Best key length found with Index of Coincidence
     key_length = find_key_length(text)
+    text_length = len(text)
 
-    ################################################################################
+    key = ""
 
-    print("best key:", caesar_break("VURZJUGRGGUGVGJQKEOAGUGKKQVWQP"))
-
-    TEXT_LENGTH = len(text)
-    chi_sq = 0
-
+    # Break <key_length> Caesar ciphers.
+    # First cipher is constructed using every <key_length>th letter starting with the first
+    # Same for the second cipher but starting at the second letter, etc...
     for start in range(key_length):
         seq = ""
-        for i in range(TEXT_LENGTH):
-            idx = start + key_length
-            if idx > TEXT_LENGTH:
+        for i in range(text_length):
+            idx = start + (i * key_length)
+            if idx > text_length - 1:
                 break
             seq += text[idx]
 
-        for j in range(26):
-            print(caesar_decrypt(seq, j))
+        # With Chi-squared, find the best key for the current sequence
+        key += chr(65 + caesar_break(seq))
 
-
-
-
-    return ''
+    return key
 
 
 def vigenere_caesar_encrypt(text, vigenere_key, caesar_key):
@@ -320,8 +326,25 @@ def vigenere_caesar_encrypt(text, vigenere_key, caesar_key):
     -------
     the ciphertext of <text> encrypted with improved Vigenere under keys <key_vigenere> and <key_caesar>
     """
-    # TODO
-    return ""
+    text = normalize_text(text)
+    vigenere_key = normalize_text(vigenere_key)
+
+    text_len = len(text)
+    vigenere_key_len = len(vigenere_key)
+
+    mul = ceil(text_len / vigenere_key_len)
+
+    new_vigenere_key = vigenere_key
+
+    for i in range(mul):
+        vigenere_key = caesar_encrypt(vigenere_key, caesar_key)
+        new_vigenere_key += vigenere_key
+
+    new_vigenere_key = new_vigenere_key[:-3]
+
+    print(new_vigenere_key)
+
+    return vigenere_encrypt(text, new_vigenere_key)
 
 
 def vigenere_caesar_decrypt(text, vigenere_key, caesar_key):
@@ -336,8 +359,10 @@ def vigenere_caesar_decrypt(text, vigenere_key, caesar_key):
     -------
     the plaintext of <text> decrypted with improved Vigenere under keys <key_vigenere> and <key_caesar>
     """
-    # TODO
-    return ""
+    text = normalize_text(text)
+    vigenere_key = "ABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNO"
+
+    return vigenere_decrypt(text, vigenere_key)
 
 
 def vigenere_caesar_break(text):
@@ -359,6 +384,9 @@ def vigenere_caesar_break(text):
 
 
 def main():
+    test_text = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer The Slings and Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, And by opposing end them? William Shakespeare - Hamlet"
+    test_key = "ABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNO"
+
     print("Welcome to the Vigenere breaking tool\n")
 
     ################################################################################
@@ -427,7 +455,6 @@ def main():
 
     plain_text_vigenere_1 = "Vigenère"
     plain_text_vigenere_2 = "La crypto c'est rigolo"
-    test_text = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer The Slings and Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, And by opposing end them? William Shakespeare - Hamlet"
 
     keys_vigenere_1 = "ABC"
     keys_vigenere_2 = "xyz"
@@ -463,12 +490,22 @@ def main():
     # 3.2 Cryptanalyse du Chiffre de Vigenère
     ################################################################################
 
-    print("\nVigenere break\n")
+    print("\n3.2 Vigenere break\n")
 
     # vptnvffuntshtarptymjwzirappljmhhqvsubw
     file2 = open("vigenere.txt", "r")
-    vigenere_break("VURZJUGRGGUGVGJQKEOAGUGKKQVWQP")
+    print("Key : ", vigenere_break(file2.read()))
     file2.close()
+
+    ################################################################################
+    # Vigenere Caesar encrypt
+    ################################################################################
+
+    print("1: ", vigenere_encrypt(test_text, test_key))
+
+    print("Plain text       : ", normalize_text(test_text))
+    print("Cipher text      : ", vigenere_caesar_encrypt(test_text, test_key, 2))
+    print("Deciphered text  : ", vigenere_caesar_decrypt(test_text, test_key, 2))
 
 
 if __name__ == "__main__":
