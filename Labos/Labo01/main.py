@@ -1,6 +1,20 @@
 import unicodedata
 from math import ceil
 
+# Letter frequencies for French
+freq_french_letters = [0.08152736532371435, 0.009264280165431146, 0.03018370472614278, 0.039488781721660225,
+                       0.1725705912650587,
+                       0.010705768161813827, 0.01115283342484289, 0.008750920053511841, 0.07133920694362048,
+                       0.00557981644826197,
+                       0.0006332008002978168, 0.05464565403268166, 0.029749388472515684, 0.07138255357558718,
+                       0.053824617827194825, 0.028393743806106264, 0.01152680436730066, 0.06824799713062295,
+                       0.08397687499681275,
+                       0.06971243334392918, 0.06373144806648523, 0.014542370057846506, 0.00040286869710223517,
+                       0.004486801375533121, 0.0025676504935566507, 0.001612324722369072]
+
+test_text = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer " \
+                "The Slings and Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, " \
+                "And by opposing end them? William Shakespeare - Hamlet"
 
 def normalize_text(text):
     """
@@ -79,6 +93,7 @@ def caesar_decrypt(text, key):
 
 
 def freq_letters(text):
+
     # Contains occurrences of every lettre (a-z)
     freq_vector = [0] * 26
 
@@ -104,16 +119,7 @@ def freq_analysis(text):
     list
         the frequencies of every letter (a-z) in the text.
     """
-    # Contains occurrences of every lettre (a-z)
-    freq_vector = [0] * 26
-
-    # Normalize text
-    text = normalize_text(text)
-
-    # Loop through every character in text and count occurrences of every letter (A-Z)
-    for i in text:
-        if 65 <= ord(i) <= 90:
-            freq_vector[ord(i) - 65] += 1
+    freq_vector = freq_letters(text)
 
     # Sum total number of letters counted
     sum_letters = sum(freq_vector)
@@ -135,13 +141,6 @@ def caesar_break(text):
     -------
     a number corresponding to the caesar key
     """
-    # Letter frequencies for French
-    stats = [0.08152736532371435, 0.009264280165431146, 0.03018370472614278, 0.039488781721660225, 0.1725705912650587,
-             0.010705768161813827, 0.01115283342484289, 0.008750920053511841, 0.07133920694362048, 0.00557981644826197,
-             0.0006332008002978168, 0.05464565403268166, 0.029749388472515684, 0.07138255357558718,
-             0.053824617827194825, 0.028393743806106264, 0.01152680436730066, 0.06824799713062295, 0.08397687499681275,
-             0.06971243334392918, 0.06373144806648523, 0.014542370057846506, 0.00040286869710223517,
-             0.004486801375533121, 0.0025676504935566507, 0.001612324722369072]
 
     tmp_sum = 100  # Best sum yet (100 is a random value that seems high enough, might not be for a long text)
     tmp_key = 0  # Best key yet
@@ -152,7 +151,7 @@ def caesar_break(text):
         freq_vector = freq_analysis(trial)
         sum = 0
         for i in range(len(freq_vector)):
-            sum += ((freq_vector[i] - stats[i]) ** 2) / stats[i]
+            sum += ((freq_vector[i] - freq_french_letters[i]) ** 2) / freq_french_letters[i]
 
         if sum < tmp_sum:
             tmp_sum = sum
@@ -234,7 +233,7 @@ def coincidence_index(text):
     for i in range(26):
         sum_freq += freq_vector[i] * (freq_vector[i] - 1)
 
-    ic = sum_freq / (N * (N - 1))
+    ic = (26 * sum_freq) / (N * (N - 1))
 
     return ic
 
@@ -270,7 +269,6 @@ def find_key_length(text):
             seq += text[idx]
 
         ic = coincidence_index(seq)
-        print(l, " : ", ic)
         if ic > best_ic:
             best_ic = ic
             best_key_length = l
@@ -369,6 +367,65 @@ def vigenere_caesar_decrypt(text, vigenere_key, caesar_key):
     return vigenere_decrypt(text, new_vigenere_key)
 
 
+def find_vigenere_caesar_key(text):
+    """
+    Parameters
+    ----------
+    text: the ciphertext to break
+
+    Returns
+    -------
+    pair
+        the vigenere keyword length
+        the caesar key
+    """
+    MAX_VIGENERE_KEY_LEN = 20
+    MAX_CAESAR_KEY = 20
+
+    text = normalize_text(text)
+    text_len = len(text)
+
+    caesar_key = 0
+    vigenere_key_len = 0
+    best_vigenere_ic = 0
+
+    # Find length of vigenere key
+    for period in range(2, MAX_VIGENERE_KEY_LEN):
+        seq = ""
+
+        # If current period is 3, create a seq of every 3rd letter
+        for i in range(text_len):
+            idx = i * period
+            if idx > text_len - 1:
+                break
+            seq += text[idx]
+
+        # For the current period (length of vigenere key) find the best caesar key
+        best_caesar_key = 0
+        best_caesar_key_ic = 0
+        best_seq = ""
+
+        for key in range(MAX_CAESAR_KEY):
+            tmp_seq = ""
+            tmp_ic = 0
+            for i in range(len(seq)):
+                tmp_seq += caesar_decrypt(seq[i], key * i)
+
+            tmp_ic = coincidence_index(tmp_seq)
+            if tmp_ic > best_caesar_key_ic:
+                best_caesar_key = key
+                best_caesar_key_ic = tmp_ic
+                best_seq = tmp_seq
+
+        vigenere_ic = coincidence_index(best_seq)
+        if vigenere_ic > best_vigenere_ic:
+            best_vigenere_ic = vigenere_ic
+            vigenere_key_len = period
+            caesar_key = best_caesar_key
+
+    return vigenere_key_len, caesar_key
+
+
 def vigenere_caesar_break(text):
     """
     Parameters
@@ -381,25 +438,29 @@ def vigenere_caesar_break(text):
         the keyword corresponding to the vigenere key used to obtain the ciphertext
         the number corresponding to the caesar key used to obtain the ciphertext
     """
-    vigenere_key = ""
-    caesar_key = ''
 
     text = normalize_text(text)
 
-    # Best key length found with Index of Coincidence
-    key_length = find_key_length(text)
-    text_length = len(text)
+    vigenere_key_len, caesar_key = find_vigenere_caesar_key(text)
 
-    return vigenere_break(text)
+    text_len = len(text)
+    text_corrected = ""
+
+    mul = 0
+    char_pos = 0
+
+    for i in range(text_len):
+        text_corrected += caesar_decrypt(text[i], mul * caesar_key)
+        if char_pos >= vigenere_key_len - 1:
+            mul += 1
+            char_pos = 0
+        else:
+            char_pos += 1
+
+    return vigenere_break(text_corrected), caesar_key
 
 
 def main():
-    test_text = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer " \
-                "The Slings and Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, " \
-                "And by opposing end them? William Shakespeare - Hamlet"
-    test_key = "ABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDE" \
-               "EFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNOOPQQRSSTUUVWWXYYZAABCCDEEFGGHIIJKKLMMNO"
-
     print("\nWelcome to the Vigenere breaking tool\n")
 
     ####################################################################################################################
@@ -514,6 +575,7 @@ def main():
     ####################################################################################################################
     # 4.13 Vigenere Caesar encrypt
     ####################################################################################################################
+
     print("\n4.13 Vigenere amelioree\n")
 
     test_text_cipherd = vigenere_caesar_encrypt(test_text, "MAISON", 2)
@@ -525,26 +587,16 @@ def main():
     ####################################################################################################################
     # 4.14 Vigenere Caesar break
     ####################################################################################################################
+
     print("\n4.14 Vigenere amelioree break\n")
     file3 = open("vigenereAmeliore.txt", "r")
     text_vigenere_amelioree = file3.read()
     file3.close()
 
-    test = "NOUSNESOMMESPASDESETRANGERSDELAMOURTUCONNAISLESREGLESTOUTCOMMEMOIUNENGAGEMENTCOMPLETESTCEAQUOIJEPENSETUN" \
-           "OBTIENDRAISJAMAISCECIDUNAUTREGARSJEVEUXJUSTETEDIRECEQUEJERESSENSJEDOISTEFAIRECOMPRENDREJENETABANDONNERAI" \
-           "JAMAISJENETELAISSERAIJAMAISTOMBERJENEVAISPASTETOURNERAUTOURPUISTABANDONNERJENETEFERAIJAMAISPLEURERJENETE" \
-           "DIRAIJAMAISAUREVOIRJENETEMENTIRAIJAMAISNITEFERAIDUMALNOUSNOUSCONNAISSONSDEPUISSILONGTEMPSTONCOEURASOUFFE" \
-           "RTMAISTUESTROPTIMIDEPOURLEDIREINTERIEUREMENTNOUSSAVONSTOUSLESDEUXCEQUISESTPASSENOUSCONNAISSONSLEJEUETNOU" \
-           "SALLONSLEJOUERETSITUMEDEMANDESCOMMENTJEMESENSNEMEDISPASQUETUESTROPAVEUGLEPOURVOIRJENETABANDONNERAIJAMAIS" \
-           "JENETELAISSERAIJAMAISTOMBERJENEVAISPASTETOURNERAUTOURPUISTABANDONNERJENETEFERAIJAMAISPLEURERJENETEDIRAIJ" \
-           "AMAISAUREVOIRJENETEMENTIRAIJAMAISNITEFERAIDUMALTABANDONNERTABANDONNERJENEVAISJAMAISJENEVAISJAMAISTABANDO" \
-           "NNERJENEVAISJAMAISJENEVAISJAMAISTABANDONNERNOUSNOUSCONNAISSONSDEPUISSILONGTEMPSTONCOEURASOUFFERTMAISTUES" \
-           "TROPTIMIDEPOURLEDIREINTERIEUREMENTNOUSSAVONSTOUSLESDEUXCEQUISESTPASSENOUSCONNAISSONSLEJEUETNOUSALLONSLEJ" \
-           "OUERETSITUMEDEMANDESCOMMENTJEMESENSNEMEDISPASQUETUESTROPAVEUGLEPOURVOIRJENETABANDONNERAIJAMAISJENETELAIS" \
-           "SERAIJAMAISTOMBERJENEVAISPASTETOURNERAUTOURPUISTABANDONNERJENETEFERAIJAMAISPLEURERJENETEDIRAIJAMAISAUREV" \
-           "OIRJENETEMENTIRAIJAMAISNITEFERAIDUMAL"
-    cipher_test = vigenere_caesar_encrypt(test, "RICKROLLED", 2)
-    print(cipher_test)
+    vigenere_key, caesar_key = vigenere_caesar_break(text_vigenere_amelioree)
+    print("   Cle de vigenere : ", vigenere_key)
+    print("   Cle de caesar   : ", caesar_key)
+    print("   Plain text      : ", vigenere_caesar_decrypt(text_vigenere_amelioree, vigenere_key, caesar_key))
 
 
 if __name__ == "__main__":
