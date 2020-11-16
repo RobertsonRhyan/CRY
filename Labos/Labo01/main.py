@@ -13,8 +13,9 @@ freq_french_letters = [0.08152736532371435, 0.009264280165431146, 0.030183704726
                        0.004486801375533121, 0.0025676504935566507, 0.001612324722369072]
 
 test_text = "To be, or not to be, that is the question Whether 'tis Nobler in the mind to suffer " \
-                "The Slings and Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, " \
-                "And by opposing end them? William Shakespeare - Hamlet"
+            "The Slings and Arrows of outrageous Fortune, Or to take Arms against a Sea of troubles, " \
+            "And by opposing end them? William Shakespeare - Hamlet"
+
 
 def normalize_text(text):
     """
@@ -93,7 +94,6 @@ def caesar_decrypt(text, key):
 
 
 def freq_letters(text):
-
     # Contains occurrences of every lettre (a-z)
     freq_vector = [0] * 26
 
@@ -593,11 +593,11 @@ def main():
     text_vigenere_amelioree = file3.read()
     file3.close()
 
-    vigenere_key, caesar_key = vigenere_caesar_break(text_vigenere_amelioree)
+    text1 = "CIHXXBXUSLSNMXEPNXTMYZWXMPKQKNBBSDHQTZYGKKRJTGRPKEERUGJIUVYUULBOOHEOTPKDZYQBKEIKBCXWXPQPQPWWEDKTNWWFHKAWWSWWFDCLKQSNXRVYZVWLOJPRMYCRRDSAXXHYYYYHDETMQORBZIXXCBZXDBRNHAEHOXRIBOQHOKQJIOIUWQEXOVYCKQSZCZITQZPVSLCJMQYBBNJJSUMSUVKFDNMPDPAKZBKEAFIJYXXYDCEDPCOMQWSLKXMHFPKNJHSDGSWALZVGANANRBXRPGWELLQNHZONXSTQBFITKSZARFTXQKMHXJYGICIEUAECAAWDJUWVFISLKSXCPDQZBCOQFNKKTFASWGQCYFJRNWYBNGISBTLYEFZNAVEYXXCBAXTTACSTTGAIEFLKHVJNAVJFEHGWQRAUZUKXRVXNDPTFWTGHWALEYWRJGCWQQFCFDFKCLTDIMMQQZXWIIMMMIKLQIZNYEEYWWBAZWASXDRHPIHGDGZYOKXKNZLROHNPPGDBCZNPRYWNZFHEJHPKUPIOACZPXOTXQ"
+    vigenere_key, caesar_key = vigenere_caesar_break(text1)
     print("   Cle de vigenere : ", vigenere_key)
     print("   Cle de caesar   : ", caesar_key)
-    print("   Plain text      : ", vigenere_caesar_decrypt(text_vigenere_amelioree, vigenere_key, caesar_key))
-
+    print("   Plain text      : ", vigenere_caesar_decrypt(text1, vigenere_key, caesar_key))
 
 if __name__ == "__main__":
     main()
