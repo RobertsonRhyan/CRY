@@ -1,5 +1,14 @@
+from Labos.Labo02.cbcmac import *
+
+
 def main():
-    print("TEST")
+    key = b"password"
+
+
+    iv, message, tag = cbcmac(b"Envoyer 127'000 CHF vers siteABC", key)
+
+    print(cbcmac_verify(message, key, iv, tag))
+
 
 
 
