@@ -18,30 +18,20 @@ def cbcmac(message, key):
 
     if len(message) < 32:
         message = pad(message, 32, 'x923')
+    elif len(message) > 32:
+        raise Exception("Message must be 256bits or less")
 
     if len(key) < 32:
         key = pad(key, 32, 'x923')
+    elif len(key) > 32:
+        raise Exception("Key must be 256bits or less")
 
-    left_block = message[:16]
-    right_block = message[16:]
+    cipher = AES.new(key, AES.MODE_CBC)
+    tag = cipher.encrypt(pad(message, AES.block_size))
+    iv = cipher.iv
 
-    left_cipher = AES.new(key, AES.MODE_CBC)
-    left_ct_bytes = left_cipher.encrypt(left_block)
-    left_iv = left_cipher.iv #base64.b64encode(cipher.iv).decode('utf-8')
-    left_ct = left_ct_bytes #base64.b64encode(left_ct_bytes).decode('utf-8')
+    return iv, message, tag
 
-    right_cipher = AES.new(key, AES.MODE_CBC)
-    right_ct_bytes = right_cipher.encrypt(right_block)
-    right_iv = right_cipher.iv
-    right_ct = right_ct_bytes
-
-    print("iv : , \ncipher : ")
-
-    tag = left_ct + right_ct[0:]
-
-    iv = left_iv + right_iv[0:]
-
-    return (iv, message, tag)
 
 def cbcmac_verify(message, key, iv, tag):
     """
@@ -60,27 +50,25 @@ def cbcmac_verify(message, key, iv, tag):
 
     if len(message) < 32:
         message = pad(message, 32, 'x923')
+    elif len(message) > 32:
+        raise Exception("Message must be 256bits or less")
 
     if len(key) < 32:
         key = pad(key, 32, 'x923')
+    elif len(key) > 32:
+        raise Exception("Key must be 256bits or less")
 
-    left_block = message[:16]
-    right_block = message[16:]
-
-    left_iv = iv[:16]
-    right_iv = iv[16:]
-
-    left_cipher = AES.new(key, AES.MODE_CBC, left_iv)
-    left_ct_bytes = left_cipher.encrypt(left_block)
-    left_ct = left_ct_bytes
-
-    right_cipher = AES.new(key, AES.MODE_CBC, right_iv)
-    right_ct_bytes = right_cipher.encrypt(right_block)
-    right_ct = right_ct_bytes
-
-    tmp_tag = left_ct + right_ct[0:]
-
-
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    tmp_tag = cipher.encrypt(pad(message, AES.block_size))
 
     return tag == tmp_tag
 
+
+def cbc_mac_forge(iv, message, fake_message):
+
+    iv_decoded = base64.b64decode(iv)
+    tmp = strxor.strxor(iv_decoded, message[0:16])
+    forged_iv = strxor.strxor(tmp, fake_message[0:16])
+    forged_iv_encoded = base64.b64encode(forged_iv)
+
+    return forged_iv_encoded

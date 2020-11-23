@@ -143,4 +143,5 @@ if __name__ == '__main__':
     pt = (b"\x00\x00\x00\x00" + password.encode("UTF-8"))*(repetitions)
     ct = my_speck.encryptCBC(pt, iv)
     print(ct)
+
         
